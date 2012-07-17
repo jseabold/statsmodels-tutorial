@@ -10,6 +10,8 @@
 # Documentation: http://statsmodels.sf.net
 # 
 # Mailing List: http://groups.google.com/group/pystatsmodels
+# 
+# Use the source: https://github.com/statsmodels/statsmodels
 
 # <headingcell level=3>
 
@@ -42,7 +44,7 @@ import statsmodels.api as sm
 
 # <codecell>
 
-from statsmodels.formula.api import ols, rlm, glm
+from statsmodels.formula.api import ols, rlm, glm, #etc.
 
 # <headingcell level=3>
 

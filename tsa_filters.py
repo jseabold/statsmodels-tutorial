@@ -26,6 +26,10 @@ del dta['quarter']
 
 # <codecell>
 
+print sm.datasets.macrodata.NOTE
+
+# <codecell>
+
 print dta.head(10)
 
 # <codecell>
@@ -33,6 +37,8 @@ print dta.head(10)
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(111)
 dta.realgdp.plot(ax=ax);
+legend = ax.legend(loc = 'upper left');
+legend.prop.set_size(20);
 
 # <headingcell level=3>
 

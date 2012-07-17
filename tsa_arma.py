@@ -57,7 +57,11 @@ print arma_mod30.aic, arma_mod30.bic, arma_mod30.hqic
 
 # <rawcell>
 
-# Does out model meet the theory?
+# Does our model obey the theory?
+
+# <codecell>
+
+sm.stats.durbin_watson(arma_mod30.resid.values)
 
 # <codecell>
 
@@ -78,10 +82,6 @@ stats.normaltest(resid)
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(111)
 fig = qqplot(resid, line='q', ax=ax, fit=True)
-
-# <codecell>
-
-qqplot?
 
 # <codecell>
 
@@ -116,6 +116,20 @@ print predict_sunspots
 ax = dta.ix['1950':].plot(figsize=(12,8))
 ax = predict_sunspots.plot(ax=ax, style='r--', label='Dynamic Prediction');
 ax.legend();
+ax.axis((-20.0, 38.0, -4.0, 200.0));
+
+# <codecell>
+
+def mean_forecast_err(y, yhat):
+    return (y-yhat).mean()
+
+# <codecell>
+
+mean_forecast_err(dta, predict_sunspots)
+
+# <headingcell level=3>
+
+# Exercise: Can you obtain a better fit for the Sunspots model? (Hint: sm.tsa.AR has a method select_order)
 
 # <headingcell level=3>
 
@@ -156,7 +170,7 @@ arma_t.isstationary()
 
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(111)
-ax.plot(arma_t.generate_sample(size=50))
+ax.plot(arma_t.generate_sample(size=50));
 
 # <codecell>
 
@@ -201,5 +215,30 @@ print table.set_index('lag')
 
 # <headingcell level=3>
 
-# Exercise: Can you obtain a better fit for the Sunspots model? (Hint: sm.tsa.AR has a method select_order)
+# Exercise: How good of in-sample prediction can you do for another series, say, CPI
+
+# <codecell>
+
+macrodta = sm.datasets.macrodata.load_pandas().data
+macrodta.index = pandas.Index(sm.tsa.datetools.dates_from_range('1959Q1', '2009Q3'))
+cpi = macrodta["cpi"]
+
+# <headingcell level=4>
+
+# Hint: 
+
+# <codecell>
+
+fig = plt.figure(figsize=(12,8))
+ax = fig.add_subplot(111)
+ax = cpi.plot(ax=ax);
+ax.legend();
+
+# <rawcell>
+
+# P-value of the unit-root test, resoundly rejects the null of no unit-root.
+
+# <codecell>
+
+print sm.tsa.adfuller(cpi)[1]
 

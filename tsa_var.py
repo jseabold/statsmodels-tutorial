@@ -7,7 +7,7 @@
 
 # <rawcell>
 
-# Vector Autoregression (VAR), introduced by nobel laureate Christopher Sims in 1980, is a powerful statistical tool in the macroeconomists toolkit. 
+# Vector Autoregression (VAR), introduced by Nobel laureate Christopher Sims in 1980, is a powerful statistical tool in the macroeconomist's toolkit. 
 
 # <markdowncell>
 
@@ -17,7 +17,7 @@
 # 
 # $$u_t \sim {\sf Normal}(0, \Sigma_u)$$
 # 
-# where $A_i$ is a $K \times K$ coefficient matrix.
+# where $Y_t$ is of dimension $K$ and $A_i$ is a $K \times K$ coefficient matrix.
 
 # <codecell>
 
@@ -117,7 +117,7 @@ irf = var_mod.irf(24)
 
 # <codecell>
 
-irf.plot(orth=True, subplot_params = {'fontsize' : 18})
+irf.plot(orth=True, signif=.33, subplot_params = {'fontsize' : 18})
 
 # <rawcell>
 

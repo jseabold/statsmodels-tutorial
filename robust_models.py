@@ -9,7 +9,7 @@
 
 # An M-estimator minimizes the function 
 # 
-# $$Q(e_i, \rho) = \sum_i\rho(\frac{e_i}{s})$$
+# $$Q(e_i, \rho) = \sum_i~\rho(\frac{e_i}{s})$$
 # 
 # where $\rho$ is a symmetric function of the residuals intended to reduce the influence of outliers and $s$ is an estimate of scale. The robust estimates $\hat{\beta}$ are computed by iteratively re-weighted least squares.
 
@@ -53,6 +53,10 @@ plot_weights(support, andrew.weights, ['$-\pi*a$', '0', '$\pi*a$'], [-np.pi*a, 0
 
 # <codecell>
 
+help(norms.Hampel.weights)
+
+# <codecell>
+
 c = 8
 support = np.linspace(-3*c, 3*c, 1000)
 hampel = norms.Hampel(a=2., b=4., c=c)
@@ -61,6 +65,10 @@ plot_weights(support, hampel.weights, ['3*c', '0', '3*c'], [-3*c, 0, 3*c]);
 # <headingcell level=3>
 
 # Huber's t
+
+# <codecell>
+
+help(norms.HuberT.weights)
 
 # <codecell>
 
@@ -75,6 +83,10 @@ plot_weights(support, huber.weights, ['-3*t', '0', '3*t'], [-3*t, 0, 3*t]);
 
 # <codecell>
 
+help(norms.LeastSquares.weights)
+
+# <codecell>
+
 support = np.linspace(-3, 3, 1000)
 lst_sq = norms.LeastSquares()
 plot_weights(support, lst_sq.weights, ['-3', '0', '3'], [-3, 0, 3]);
@@ -82,6 +94,10 @@ plot_weights(support, lst_sq.weights, ['-3', '0', '3'], [-3, 0, 3]);
 # <headingcell level=3>
 
 # Ramsay's Ea
+
+# <codecell>
+
+help(norms.RamsayE.weights)
 
 # <codecell>
 
@@ -96,6 +112,10 @@ plot_weights(support, ramsay.weights, ['-3*a', '0', '3*a'], [-3*a, 0, 3*a]);
 
 # <codecell>
 
+help(norms.TrimmedMean.weights)
+
+# <codecell>
+
 c = 2
 support = np.linspace(-3*c, 3*c, 1000)
 trimmed = norms.TrimmedMean(c=c)
@@ -104,6 +124,10 @@ plot_weights(support, trimmed.weights, ['-3*c', '0', '3*c'], [-3*c, 0, 3*c]);
 # <headingcell level=3>
 
 # Tukey's Biweight
+
+# <codecell>
+
+help(norms.TukeyBiweight.weights)
 
 # <codecell>
 
@@ -118,12 +142,76 @@ plot_weights(support, tukey.weights, ['-3*c', '0', '3*c'], [-3*c, 0, 3*c]);
 
 # <rawcell>
 
+# Robust estimates of the location
+
+# <codecell>
+
+x = np.array([1, 2, 3, 4, 500])
+
+# <codecell>
+
+x.mean() # non-robust
+
+# <codecell>
+
+np.median(x) # robust - breakdown point 50%
+
+# <rawcell>
+
+# Analagously for the scale
+
+# <codecell>
+
+x.std() # not robust
+
+# <markdowncell>
+
+# Median Absolute Deviation
+# 
+# $$ median_i |X_i - median_j(X_j)|) $$
+
+# <markdowncell>
+
+# Standardized Median Absolute Deviation is a consistent estimator for $\hat{\sigma}$
+# 
+# $$\hat{\sigma}=K \cdot MAD$$
+# 
+# where $K$ depends on the distribution. For the normal distribution for example,
+# 
+# $$K = \Phi^{-1}(.75)$$
+
+# <codecell>
+
+stats.norm.ppf(.75)
+
+# <codecell>
+
+print x
+
+# <codecell>
+
+sm.robust.scale.stand_mad(x)
+
+# <codecell>
+
+np.array([1,2,3,4,5.]).std()
+
+# <rawcell>
+
 # The default is MAD - Median Absolute Deviation, but another popular choice is Huber's proposal 2
 
 # <codecell>
 
 np.random.seed(12345)
 fat_tails = stats.t(6).rvs(40)
+
+# <codecell>
+
+kde = sm.nonparametric.KDE(fat_tails)
+kde.fit()
+fig = plt.figure(figsize=(12,8))
+ax = fig.add_subplot(111)
+ax.plot(kde.support, kde.density);
 
 # <codecell>
 
@@ -149,6 +237,10 @@ sm.robust.stand_mad(fat_tails)
 
 # <codecell>
 
+sm.robust.stand_mad(fat_tails, c=stats.t(6).ppf(.75))
+
+# <codecell>
+
 sm.robust.scale.mad(fat_tails)
 
 # <headingcell level=3>
@@ -158,27 +250,36 @@ sm.robust.scale.mad(fat_tails)
 # <codecell>
 
 from statsmodels.graphics.api import abline_plot
-from pandas.rpy import load_data
+
 from statsmodels.formula.api import ols, rlm
 
 # <codecell>
 
-prestige = load_data('Duncan', 'car')
+try:
+    from pandas.rpy import load_data
+    prestige = load_data('Duncan', 'car')
+except:
+    url = 'eagle1.american.edu/~js2796a/Duncan.csv'
+    prestige = pandas.read_csv(url, index_col=0)
+    # could load stata file, but it's for Stata 8
+    #from statsmodels.tools.tools import webuse
+    #url = 'http://www.ats.ucla.edu/stat/stata/examples/ara/'
+    #prestige = webuse('duncan', url)
+
+# <codecell>
+
 print prestige.head(10)
 
 # <codecell>
 
 fig = plt.figure(figsize=(12,12))
-ax1 = fig.add_subplot(211)
+ax1 = fig.add_subplot(211, xlabel='Income', ylabel='Prestige')
 ax1.scatter(prestige.income, prestige.prestige)
-ax1.set_xlabel('Income')
-ax1.set_ylabel('Prestige')
 xy_outlier = prestige.ix['minister'][['income','prestige']]
 ax1.annotate('Minister', xy_outlier, xy_outlier+1, fontsize=16)
-ax2 = fig.add_subplot(212)
-ax2.scatter(prestige.education, prestige.prestige)
-ax2.set_xlabel('Education')
-ax2.set_ylabel('Prestige');
+ax2 = fig.add_subplot(212, xlabel='Education',
+                           ylabel='Prestige')
+ax2.scatter(prestige.education, prestige.prestige);
 
 # <codecell>
 
@@ -201,7 +302,15 @@ print infl.summary_frame().ix['minister']
 
 # <codecell>
 
-print ols_model.outlier_test('sidak')
+sidak = ols_model.outlier_test('sidak')
+sidak.sort('unadj_p', inplace=True)
+print sidak
+
+# <codecell>
+
+fdr = ols_model.outlier_test('fdr_bh')
+fdr.sort('unadj_p', inplace=True)
+print fdr
 
 # <codecell>
 
@@ -222,7 +331,11 @@ print rlm_model.weights
 
 # <codecell>
 
-dta = load_data('starsCYG', package='robustbase')
+try:
+    dta = load_data('starsCYG', package='robustbase')
+except:
+    url = 'eagle1.american.edu/~js2796a/starsCYG.csv'
+    dta = pandas.read_csv(url)
 
 # <codecell>
 
@@ -268,13 +381,22 @@ abline_plot(model_results=rlm_mod, ax=ax, color='red')
 # <codecell>
 
 infl = ols_model.get_influence()
+
+# <codecell>
+
 h_bar = 2*(ols_model.df_model + 1 )/ols_model.nobs
 hat_diag = infl.summary_frame()['hat_diag']
 hat_diag.ix[hat_diag > h_bar]
 
 # <codecell>
 
-print ols_model.outlier_test('sidak')
+sidak2 = ols_model.outlier_test('sidak')
+sidak2.sort('unadj_p', inplace=True)
+
+# <codecell>
+
+fdr2 = ols_model.outlier_test('fdr_bh')
+fdr2.sort('unadj_p', inplace=True)
 
 # <rawcell>
 
@@ -320,4 +442,55 @@ print params
 # <codecell>
 
 abline_plot(intercept=params[0], slope=params[1], ax=ax, color='green')
+
+# <headingcell level=3>
+
+# Exercise: Breakdown points of M-estimator
+
+# <codecell>
+
+np.random.seed(12345)
+nobs = 200
+beta_true = np.array([3, 1, 2.5, 3, -4])
+X = np.random.uniform(-20,20, size=(nobs, len(beta_true)-1))
+# stack a constant in front
+X = sm.add_constant(X, prepend=True) # np.c_[np.ones(nobs), X]
+mc_iter = 500
+contaminate = .25 # percentage of response variables to contaminate
+
+# <codecell>
+
+all_betas = []
+for i in range(mc_iter):
+    y = np.dot(X, beta_true) + np.random.normal(size=200)
+    random_idx = np.random.randint(0, nobs, size=int(contaminate * nobs))
+    y[random_idx] = np.random.uniform(-750, 750) #, size=len(random_idx))
+    beta_hat = sm.RLM(y, X).fit().params
+    all_betas.append(beta_hat)
+
+# <codecell>
+
+all_betas = np.asarray(all_betas)
+se_loss = lambda x : np.linalg.norm(x, ord=2)**2
+se_beta = map(se_loss, all_betas - beta_true)
+
+# <headingcell level=4>
+
+# Squared error loss
+
+# <codecell>
+
+np.array(se_beta).mean()
+
+# <codecell>
+
+all_betas.mean(0)
+
+# <codecell>
+
+beta_true
+
+# <codecell>
+
+se_loss(all_betas.mean(0) - beta_true)
 

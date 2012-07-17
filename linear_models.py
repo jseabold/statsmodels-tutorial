@@ -80,7 +80,7 @@ ax.legend(scatterpoints=1, markerscale=.7, labelspacing=1);
 
 # Fit a linear model
 # 
-# $$S_i = \beta_0 + \beta_1X_i + \beta_2E_{i2} + \beta_3E_i3 + \beta_4M_i + \epsilon_i$$
+# $$S_i = \beta_0 + \beta_1X_i + \beta_2E_{i2} + \beta_3E_{i3} + \beta_4M_i + \epsilon_i$$
 # 
 # where
 # 
@@ -148,6 +148,10 @@ lm.predict({'X' : [12], 'M' : [1], 'E' : [2]})
 
 # <codecell>
 
+resid = lm.resid
+
+# <codecell>
+
 fig = plt.figure(figsize=(12,8))
 xticks = []
 ax = fig.add_subplot(111, xlabel='Group (E, M)', ylabel='Residuals')
@@ -193,9 +197,15 @@ print interX_lm.f_test([[0,0,0,0,0,1,-1],[0,0,0,0,0,0,1]])
 
 # The contrasts are created here under the hood by patsy.
 
+# <markdowncell>
+
+# Recall that F-tests are of the form $R\beta = q$
+
 # <codecell>
 
-interX_lm.model._data._orig_exog.design_info.linear_constraint('C(E)[T.2]:X = C(E)[T.3]:X = 0')
+LC = interX_lm.model._data._orig_exog.design_info.linear_constraint('C(E)[T.2]:X = C(E)[T.3]:X = 0')
+print LC.coefs
+print LC.constants
 
 # <rawcell>
 
@@ -233,7 +243,7 @@ ax.axis('tight');
 
 # <codecell>
 
-outl = interM_lm.outlier_test()
+outl = interM_lm.outlier_test('fdr_bh')
 outl.sort('unadj_p', inplace=True)
 print outl
 
@@ -284,7 +294,7 @@ ax.axis('tight');
 
 # <rawcell>
 
-# A final plot of the residuals
+# A final plot of the fitted values
 
 # <codecell>
 
@@ -325,7 +335,7 @@ ax = interaction_plot(E, M, U, colors=['red','blue'], markers=['^','D'],
 
 # <rawcell>
 
-# TEST  - Job Aptitutde Test Score
+# TEST  - Job Aptitude Test Score
 # ETHN  - 1 if minority, 0 otherwise
 # JPERF - Job performance evaluation
 
