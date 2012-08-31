@@ -259,7 +259,7 @@ try:
     from pandas.rpy import load_data
     prestige = load_data('Duncan', 'car')
 except:
-    url = 'eagle1.american.edu/~js2796a/Duncan.csv'
+    url = 'http://eagle1.american.edu/~js2796a/Duncan.csv'
     prestige = pandas.read_csv(url, index_col=0)
     # could load stata file, but it's for Stata 8
     #from statsmodels.tools.tools import webuse
