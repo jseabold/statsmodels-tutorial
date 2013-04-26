@@ -3,6 +3,9 @@
 
 # <codecell>
 
+import numpy as np
+from scipy import stats
+import statsmodels.api as sm
 from statsmodels.base.model import GenericLikelihoodModel
 
 # <codecell>
@@ -21,7 +24,7 @@ sm_probit = sm.Probit(endog, exog).fit()
 
 # <rawcell>
 
-# To create your own Likelihood Model, you just need to overwrite the loglike method.
+# * To create your own Likelihood Model, you just need to overwrite the loglike method.
 
 # <codecell>
 

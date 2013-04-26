@@ -7,20 +7,23 @@
 
 # <codecell>
 
+import pandas
+import matplotlib.pyplot as plt
+
+import statsmodels.api as sm
+
+# <codecell>
+
 dta = sm.datasets.macrodata.load_pandas().data
 
-# <rawcell>
+# <codecell>
 
-# It's preferrable to use the pandas tools for this in version >= 0.8.0, but since we're only requiring 0.7.1, I'll show you how to do this with statsmodels. The workflow is likely to be similar but simpler in the future with respect to the timeseries indices.
+index = pandas.Index(sm.tsa.datetools.dates_from_range('1959Q1', '2009Q3'))
+print index
 
 # <codecell>
 
-index = sm.tsa.datetools.dates_from_range('1959Q1', '2009Q3')
-print index[:5]
-
-# <codecell>
-
-dta.index = pandas.Index(index) # DatetimeIndex or PeriodIndex in 0.8.0
+dta.index = index
 del dta['year']
 del dta['quarter']
 
@@ -52,7 +55,7 @@ legend.prop.set_size(20);
 # 
 # The components are determined by minimizing the following quadratic loss function
 # 
-# $$\min_{\\{ \tau_{t}\\} }\sum_{t}^{T}\zeta_{t}^{2}+\lambda\sum_{t=1}^{T}\[\(\tau_{t}-\tau_{t-1}\)-\(\tau_{t-1}-\tau_{t-2}\)\]^{2}$$
+# $$\min_{\\{ \tau_{t}\\} }\sum_{t}^{T}\zeta_{t}^{2}+\lambda\sum_{t=1}^{T}\left[\left(\tau_{t}-\tau_{t-1}\right)-\left(\tau_{t-1}-\tau_{t-2}\right)\right]^{2}$$
 
 # <codecell>
 
@@ -76,7 +79,7 @@ legend.prop.set_size(20);
 
 # Baxter-King approximate band-pass filter: Inflation and Unemployment
 
-# <rawcell>
+# <headingcell level=4>
 
 # Explore the hypothesis that inflation and unemployment are counter-cyclical.
 
@@ -111,15 +114,7 @@ bk_cycles = sm.tsa.filters.bkfilter(dta[["infl","unemp"]])
 
 # <rawcell>
 
-# We lose K observations on both ends. It is suggested to use K=12 for quarterly data.
-
-# <rawcell>
-
-# Note: Pandas objects do not pass through these functions yet.
-
-# <codecell>
-
-bk_cycles = pandas.DataFrame(bk_cycles, index=dta.index[12:-12], columns=["infl_cycle", "unemp_cycle"])
+# * We lose K observations on both ends. It is suggested to use K=12 for quarterly data.
 
 # <codecell>
 
@@ -161,7 +156,6 @@ print sm.tsa.stattools.adfuller(dta['infl'])[:3]
 # <codecell>
 
 cf_cycles, cf_trend = sm.tsa.filters.cffilter(dta[["infl","unemp"]])
-cf_cycles = pandas.DataFrame(cf_cycles, index=dta.index, columns=["infl_cycle", "unemp_cycle"])
 print cf_cycles.head(10)
 
 # <codecell>

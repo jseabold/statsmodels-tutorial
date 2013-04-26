@@ -11,6 +11,10 @@
 
 # <codecell>
 
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
 from statsmodels.formula.api import logit, probit, poisson, ols
 
 # <codecell>
@@ -58,8 +62,8 @@ affair_mod.pred_table()
 
 # <codecell>
 
-mfx = affair_mod.margeff()
-print pandas.Series(mfx, index=affair_mod.params.index[1:])
+mfx = affair_mod.get_margeff()
+print mfx.summary()
 
 # <codecell>
 
@@ -77,8 +81,8 @@ print resp
 
 # <codecell>
 
-mfx = affair_mod.margeff(atexog=resp)
-print pandas.Series(mfx, index=affair_mod.params.index[1:])
+mfx = affair_mod.get_margeff(atexog=resp)
+print mfx.summary()
 
 # <codecell>
 
@@ -188,11 +192,11 @@ print glm_mod.summary()
 
 # <codecell>
 
-glm_mod.model._data._orig_endog.sum(1)
+glm_mod.model.data.orig_endog.sum(1)
 
 # <codecell>
 
-glm_mod.fittedvalues * glm_mod.model._data._orig_endog.sum(1)
+glm_mod.fittedvalues * glm_mod.model.data.orig_endog.sum(1)
 
 # <rawcell>
 
@@ -201,7 +205,7 @@ glm_mod.fittedvalues * glm_mod.model._data._orig_endog.sum(1)
 
 # <codecell>
 
-exog = glm_mod.model._data._orig_exog # get the dataframe
+exog = glm_mod.model.data.orig_exog # get the dataframe
 
 # <codecell>
 
@@ -285,7 +289,7 @@ ax.plot([0.0, 1.0],[0.0, 0.0], 'k-');
 
 resid = glm_mod.resid_deviance
 resid_std = stats.zscore(resid) 
-kde_resid = sm.nonparametric.KDE(resid_std)
+kde_resid = sm.nonparametric.KDEUnivariate(resid_std)
 kde_resid.fit()
 
 # <codecell>

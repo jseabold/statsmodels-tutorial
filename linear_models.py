@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 # <nbformat>3.0</nbformat>
 
-# <rawcell>
+# <markdowncell>
 
 # This notebook introduces the use of pandas and the formula framework in statsmodels in the context of linear modeling.
 
-# <headingcell level=4>
+# <markdowncell>
 
-# It is based heavily on Jonathan Taylor's class notes that use R
-# http://www.stanford.edu/class/stats191/interactions.html
-
-# <headingcell level=3>
-
-# Formula interface may change slightly before 0.5.0 release.
+# **It is based heavily on Jonathan Taylor's [class notes that use R](http://www.stanford.edu/class/stats191/interactions.html)**
 
 # <codecell>
+
+import matplotlib.pyplot as plt
+import pandas
+import numpy as np
 
 from statsmodels.formula.api import ols
 from statsmodels.graphics.api import interaction_plot, abline_plot, qqplot
@@ -33,12 +32,9 @@ from statsmodels.stats.api import anova_lm
 
 # <codecell>
 
-try:
-    salary_table = pandas.read_csv('salary.table')
-except:
-    url = 'http://stats191.stanford.edu/data/salary.table'
-    salary_table = pandas.read_table(url) # needs pandas 0.7.3
-    salary_table.to_csv('salary.table', index=False)
+url = 'http://stats191.stanford.edu/data/salary.table'
+salary_table = pandas.read_table(url) # needs pandas 0.7.3
+salary_table.to_csv('salary.table', index=False)
 
 # <codecell>
 
@@ -51,11 +47,7 @@ M = salary_table.M # Management
 X = salary_table.X # Experience
 S = salary_table.S # Salary
 
-# <rawcell>
-
-# A context manager that mimics R's with() function can be found here: https://gist.github.com/2347382
-
-# <rawcell>
+# <markdowncell>
 
 # Let's explore the data
 
@@ -97,7 +89,7 @@ print lm.summary()
 
 # Aside: Contrasts (see contrasts notebook)
 
-# <rawcell>
+# <markdowncell>
 
 # Look at the design matrix created for us. Every results instance has a reference to the model.
 
@@ -105,23 +97,23 @@ print lm.summary()
 
 lm.model.exog[:10]
 
-# <rawcell>
+# <markdowncell>
 
 # Since we initially passed in a DataFrame, we have a transformed DataFrame available.
 
 # <codecell>
 
-print lm.model._data._orig_exog.head(10)
+print lm.model.data.orig_exog.head(10)
 
-# <rawcell>
+# <markdowncell>
 
 # There is a reference to the original untouched data in
 
 # <codecell>
 
-print lm.model._data.frame.head(10)
+print lm.model.data.frame.head(10)
 
-# <rawcell>
+# <markdowncell>
 
 # If you use the formula interface, statsmodels remembers this transformation. Say you want to know the predicted salary for someone with 12 years experience and a Master's degree who is in a management position
 
@@ -129,20 +121,20 @@ print lm.model._data.frame.head(10)
 
 lm.predict({'X' : [12], 'M' : [1], 'E' : [2]})
 
-# <rawcell>
+# <markdowncell>
 
 # So far we've assumed that the effect of experience is the same for each level of education and professional role.
 # Perhaps this assumption isn't merited. We can formally test this using some interactions.
 
-# <rawcell>
+# <markdowncell>
 
 # We can start by seeing if our model assumptions are met. Let's look at a residuals plot.
 
-# <rawcell>
+# <markdowncell>
 
 # And some formal tests
 
-# <rawcell>
+# <markdowncell>
 
 # Plot the residuals within the groups separately.
 
@@ -179,7 +171,7 @@ print interX_lm.summary()
 
 # <markdowncell>
 
-# Test that $B_5 = \beta_6 = 0$. We can use anova_lm or we can use an F-test.
+# Test that $\beta_5 = \beta_6 = 0$. We can use anova_lm or we can use an F-test.
 
 # <codecell>
 
@@ -193,7 +185,7 @@ print interX_lm.f_test('C(E)[T.2]:X = C(E)[T.3]:X = 0')
 
 print interX_lm.f_test([[0,0,0,0,0,1,-1],[0,0,0,0,0,0,1]])
 
-# <rawcell>
+# <markdowncell>
 
 # The contrasts are created here under the hood by patsy.
 
@@ -203,11 +195,11 @@ print interX_lm.f_test([[0,0,0,0,0,1,-1],[0,0,0,0,0,0,1]])
 
 # <codecell>
 
-LC = interX_lm.model._data._orig_exog.design_info.linear_constraint('C(E)[T.2]:X = C(E)[T.3]:X = 0')
+LC = interX_lm.model.data.orig_exog.design_info.linear_constraint('C(E)[T.2]:X = C(E)[T.3]:X = 0')
 print LC.coefs
 print LC.constants
 
-# <rawcell>
+# <markdowncell>
 
 # Interact education with management
 
@@ -237,7 +229,7 @@ for values, group in factor_groups:
             s=144, edgecolors='black')
 ax.axis('tight');
 
-# <rawcell>
+# <markdowncell>
 
 # There looks to be an outlier.
 
@@ -257,12 +249,12 @@ print idx
 
 # <codecell>
 
-lm32 = ols('S ~ C(E) + X + C(M)', df=salary_table, subset=idx).fit()
+lm32 = ols('S ~ C(E) + X + C(M)', data=salary_table, subset=idx).fit()
 print lm32.summary()
 
 # <codecell>
 
-interX_lm32 = ols('S ~ C(E) * X + C(M)', df=salary_table, subset=idx).fit()
+interX_lm32 = ols('S ~ C(E) * X + C(M)', data=salary_table, subset=idx).fit()
 print interX_lm32.summary()
 
 # <codecell>
@@ -272,10 +264,10 @@ print table3
 
 # <codecell>
 
-interM_lm32 = ols('S ~ X + C(E) * C(M)', df=salary_table, subset=idx).fit()
+interM_lm32 = ols('S ~ X + C(E) * C(M)', data=salary_table, subset=idx).fit()
 print anova_lm(lm32, interM_lm32)
 
-# <rawcell>
+# <markdowncell>
 
 # Re-plotting the residuals
 
@@ -292,14 +284,14 @@ for values, group in factor_groups:
             s=144, edgecolors='black')
 ax.axis('tight');
 
-# <rawcell>
+# <markdowncell>
 
 # A final plot of the fitted values
 
 # <codecell>
 
-lm_final = ols('S ~ X + C(E)*C(M)', df = salary_table.drop([32])).fit()
-mf = lm_final.model._data._orig_exog
+lm_final = ols('S ~ X + C(E)*C(M)', data=salary_table.drop([32])).fit()
+mf = lm_final.model.data.orig_exog
 lstyle = ['-','--']
 
 fig = plt.figure(figsize=(12,8))
@@ -346,6 +338,7 @@ try:
 except: # don't have data already
     url = 'http://stats191.stanford.edu/data/minority.table'
     minority_table = pandas.read_table(url)
+    minority_table.to_csv('minority.table', sep="\t", index=False)
 
 # <codecell>
 
@@ -362,7 +355,7 @@ ax.legend(['ETHN == 1', 'ETHN == 0'], scatterpoints=1)
 
 # <codecell>
 
-min_lm = ols('JPERF ~ TEST', df=minority_table).fit()
+min_lm = ols('JPERF ~ TEST', data=minority_table).fit()
 print min_lm.summary()
 
 # <codecell>
@@ -377,7 +370,7 @@ fig = abline_plot(model_results = min_lm, ax=ax)
 
 # <codecell>
 
-min_lm2 = ols('JPERF ~ TEST + TEST:ETHN', df=minority_table).fit()
+min_lm2 = ols('JPERF ~ TEST + TEST:ETHN', data=minority_table).fit()
 print min_lm2.summary()
 
 # <codecell>
@@ -398,7 +391,7 @@ ax.legend(['ETHN == 1', 'ETHN == 0'], scatterpoints=1, loc='upper left');
 
 # <codecell>
 
-min_lm3 = ols('JPERF ~ TEST + ETHN', df = minority_table).fit()
+min_lm3 = ols('JPERF ~ TEST + ETHN', data=minority_table).fit()
 print min_lm3.summary()
 
 # <codecell>
@@ -419,7 +412,7 @@ ax.legend(['ETHN == 1', 'ETHN == 0'], scatterpoints=1, loc='upper left');
 
 # <codecell>
 
-min_lm4 = ols('JPERF ~ TEST * ETHN', df = minority_table).fit()
+min_lm4 = ols('JPERF ~ TEST * ETHN', data=minority_table).fit()
 print min_lm4.summary()
 
 # <codecell>
@@ -438,9 +431,10 @@ fig = abline_plot(intercept = min_lm4.params['Intercept'] + min_lm4.params['ETHN
         ax=ax, color='green')
 ax.legend(['ETHN == 1', 'ETHN == 0'], scatterpoints=1, loc='upper left');
 
-# <rawcell>
+# <markdowncell>
 
 # Is there any effect of ETHN on slope or intercept?
+# <br />
 # Y ~ TEST vs. Y ~ TEST + ETHN + ETHN:TEST
 
 # <codecell>
@@ -448,9 +442,10 @@ ax.legend(['ETHN == 1', 'ETHN == 0'], scatterpoints=1, loc='upper left');
 table5 = anova_lm(min_lm, min_lm4)
 print table5
 
-# <rawcell>
+# <markdowncell>
 
 # Is there any effect of ETHN on intercept?
+# <br />
 # Y ~ TEST vs. Y ~ TEST + ETHN
 
 # <codecell>
@@ -458,9 +453,10 @@ print table5
 table6 = anova_lm(min_lm, min_lm3)
 print table6
 
-# <rawcell>
+# <markdowncell>
 
 # Is there any effect of ETHN on slope?
+# <br />
 # Y ~ TEST vs. Y ~ TEST + ETHN:TEST
 
 # <codecell>
@@ -468,9 +464,10 @@ print table6
 table7 = anova_lm(min_lm, min_lm2)
 print table7
 
-# <rawcell>
+# <markdowncell>
 
 # Is it just the slope or both?
+# <br />
 # Y ~ TEST + ETHN:TEST vs Y ~ TEST + ETHN + ETHN:TEST
 
 # <codecell>
@@ -491,10 +488,11 @@ print table8
 # <codecell>
 
 try:
-    kidney_table = pandas.read_table('./kidney.table')
+    kidney_table = pandas.read_table('kidney.table')
 except:
     url = 'http://stats191.stanford.edu/data/kidney.table'
     kidney_table = pandas.read_table(url, delimiter=" *")
+    kidney_table.to_csv("kidney.table", sep="\t", index=False)
 
 # <codecell>
 
@@ -511,42 +509,42 @@ fig = interaction_plot(kt['Weight'], kt['Duration'], np.log(kt['Days']+1),
 
 # <markdowncell>
 
-# $$Y_{ijk} = \mu + \alpha_i + \beta_j + \(\alpha\beta\)_{ij}+\epsilon_{ijk}$$
+# $$Y_{ijk} = \mu + \alpha_i + \beta_j + \left(\alpha\beta\right)_{ij}+\epsilon_{ijk}$$
 # 
 # with 
 # 
-# $$\epsilon_{ijk}\sim N\(0,\sigma^2\)$$
+# $$\epsilon_{ijk}\sim N\left(0,\sigma^2\right)$$
 
 # <codecell>
 
 help(anova_lm)
 
-# <rawcell>
+# <markdowncell>
 
 # Things available in the calling namespace are available in the formula evaluation namespace
 
 # <codecell>
 
-kidney_lm = ols('np.log(Days+1) ~ C(Duration) * C(Weight)', df=kt).fit()
+kidney_lm = ols('np.log(Days+1) ~ C(Duration) * C(Weight)', data=kt).fit()
 
-# <rawcell>
+# <markdowncell>
 
 # ANOVA Type-I Sum of Squares
-# 
-# SS(A) for factor A. 
-# SS(B|A) for factor B. 
-# SS(AB|B, A) for interaction AB. 
+# <br /><br />
+# SS(A) for factor A. <br />
+# SS(B|A) for factor B. <br />
+# SS(AB|B, A) for interaction AB. <br />
 
 # <codecell>
 
 print anova_lm(kidney_lm)
 
-# <rawcell>
+# <markdowncell>
 
 # ANOVA Type-II Sum of Squares
-# 
-# SS(A|B) for factor A. 
-# SS(B|A) for factor B. 
+# <br /><br />
+# SS(A|B) for factor A. <br />
+# SS(B|A) for factor B. <br />
 
 # <codecell>
 
@@ -555,13 +553,14 @@ print anova_lm(kidney_lm, typ=2)
 # <rawcell>
 
 # ANOVA Type-III Sum of Squares
-# 
-# SS(A|B, AB) for factor A. 
-# SS(B|A, AB) for factor B. 
+# <br /><br />
+# SS(A|B, AB) for factor A. <br />
+# SS(B|A, AB) for factor B. <br />
 
 # <codecell>
 
-print anova_lm(ols('np.log(Days+1) ~ C(Duration, Sum) * C(Weight, Poly)', df=kt).fit(), typ=3)
+print anova_lm(ols('np.log(Days+1) ~ C(Duration, Sum) * C(Weight, Poly)', 
+                   data=kt).fit(), typ=3)
 
 # <headingcell level=4>
 

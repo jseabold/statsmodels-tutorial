@@ -40,7 +40,7 @@ import statsmodels.api as sm
 
 # <markdowncell>
 
-# Current import convention for models for which a formula is available. **This may change in the next release.**
+# Import convention for models for which a formula is available.
 
 # <codecell>
 

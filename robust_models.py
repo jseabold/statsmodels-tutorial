@@ -5,17 +5,29 @@
 
 # M-Estimators for Robust Linear Modeling
 
+# <codecell>
+
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+
+import statsmodels.api as sm
+
 # <markdowncell>
 
-# An M-estimator minimizes the function 
+# * An M-estimator minimizes the function 
 # 
 # $$Q(e_i, \rho) = \sum_i~\rho(\frac{e_i}{s})$$
 # 
-# where $\rho$ is a symmetric function of the residuals intended to reduce the influence of outliers and $s$ is an estimate of scale. The robust estimates $\hat{\beta}$ are computed by iteratively re-weighted least squares.
+# where $\rho$ is a symmetric function of the residuals 
+# 
+# * The effect of $\rho$ is to reduce the influence of outliers
+# * $s$ is an estimate of scale. 
+# * The robust estimates $\hat{\beta}$ are computed by the iteratively re-weighted least squares algorithm
 
 # <rawcell>
 
-# We have several choices available for these weighting functions
+# * We have several choices available for the weighting functions to be used
 
 # <codecell>
 
@@ -142,27 +154,36 @@ plot_weights(support, tukey.weights, ['-3*c', '0', '3*c'], [-3*c, 0, 3*c]);
 
 # <rawcell>
 
-# Robust estimates of the location
+# * Robust estimates of the location
 
 # <codecell>
 
 x = np.array([1, 2, 3, 4, 500])
 
+# <markdowncell>
+
+# * The mean is not a robust estimator of location
+
 # <codecell>
 
-x.mean() # non-robust
+x.mean()
+
+# <markdowncell>
+
+# * The median, on the other hand, is a robust estimator with a breakdown point of 50%
 
 # <codecell>
 
-np.median(x) # robust - breakdown point 50%
+np.median(x)
 
 # <rawcell>
 
-# Analagously for the scale
+# * Analagously for the scale
+# * The standard deviation is not robust
 
 # <codecell>
 
-x.std() # not robust
+x.std()
 
 # <markdowncell>
 
@@ -198,7 +219,8 @@ np.array([1,2,3,4,5.]).std()
 
 # <rawcell>
 
-# The default is MAD - Median Absolute Deviation, but another popular choice is Huber's proposal 2
+# * The default for Robust Linear Models is MAD
+# * another popular choice is Huber's proposal 2
 
 # <codecell>
 
@@ -250,21 +272,11 @@ sm.robust.scale.mad(fat_tails)
 # <codecell>
 
 from statsmodels.graphics.api import abline_plot
-
 from statsmodels.formula.api import ols, rlm
 
 # <codecell>
 
-try:
-    from pandas.rpy import load_data
-    prestige = load_data('Duncan', 'car')
-except:
-    url = 'http://eagle1.american.edu/~js2796a/Duncan.csv'
-    prestige = pandas.read_csv(url, index_col=0)
-    # could load stata file, but it's for Stata 8
-    #from statsmodels.tools.tools import webuse
-    #url = 'http://www.ats.ucla.edu/stat/stata/examples/ara/'
-    #prestige = webuse('duncan', url)
+prestige = sm.datasets.get_rdataset("Duncan", "car", cache=True).data
 
 # <codecell>
 
@@ -325,17 +337,13 @@ print rlm_model.weights
 
 # Hertzprung Russell data for Star Cluster CYG 0B1 - Leverage Points
 
-# <rawcell>
+# <markdowncell>
 
-# Data is on the luminosity and temperature of 47 stars in the direction of Cygnus.
+# * Data is on the luminosity and temperature of 47 stars in the direction of Cygnus.
 
 # <codecell>
 
-try:
-    dta = load_data('starsCYG', package='robustbase')
-except:
-    url = 'eagle1.american.edu/~js2796a/starsCYG.csv'
-    dta = pandas.read_csv(url)
+dta = sm.datasets.get_rdataset("starsCYG", "robustbase", cache=True).data
 
 # <codecell>
 
@@ -374,9 +382,9 @@ abline_plot(model_results=ols_model, ax=ax)
 rlm_mod = sm.RLM(y, X, sm.robust.norms.TrimmedMean(.5)).fit()
 abline_plot(model_results=rlm_mod, ax=ax, color='red')
 
-# <rawcell>
+# <markdowncell>
 
-# Why? Because M-estimators are not robust to leverage points.
+# * Why? Because M-estimators are not robust to leverage points.
 
 # <codecell>
 
@@ -392,15 +400,17 @@ hat_diag.ix[hat_diag > h_bar]
 
 sidak2 = ols_model.outlier_test('sidak')
 sidak2.sort('unadj_p', inplace=True)
+print sidak2
 
 # <codecell>
 
 fdr2 = ols_model.outlier_test('fdr_bh')
 fdr2.sort('unadj_p', inplace=True)
+print fdr2
 
-# <rawcell>
+# <markdowncell>
 
-# Let's delete that line
+# * Let's delete that line
 
 # <codecell>
 
@@ -413,9 +423,10 @@ weights[X[X['log.Te'] < 3.8].index.values - 1] = 0
 wls_model = sm.WLS(y, X, weights=weights).fit()
 abline_plot(model_results=wls_model, ax=ax, color='green')
 
-# <rawcell>
+# <markdowncell>
 
-# MM estimators are good for this type of problem, unfortunately, we don't yet have these yet. It's being worked on by one of our Google Summer of Code students. We have a good excuse to look at the R cell magics in the notebook.
+# * MM estimators are good for this type of problem, unfortunately, we don't yet have these yet. 
+# * It's being worked on, but it gives a good excuse to look at the R cell magics in the notebook.
 
 # <codecell>
 
@@ -426,6 +437,7 @@ xx = X['log.Te'].values[:,None]
 
 %load_ext rmagic
 
+%R library(robustbase)
 %Rpush yy xx
 %R mod <- lmrob(yy ~ xx);
 %R params <- mod$coefficients;

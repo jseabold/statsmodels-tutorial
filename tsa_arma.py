@@ -7,6 +7,15 @@
 
 # <codecell>
 
+import numpy as np
+from scipy import stats
+import pandas
+import matplotlib.pyplot as plt
+
+import statsmodels.api as sm
+
+# <codecell>
+
 from statsmodels.graphics.api import qqplot
 
 # <codecell>
@@ -55,9 +64,9 @@ print arma_mod30.params
 
 print arma_mod30.aic, arma_mod30.bic, arma_mod30.hqic
 
-# <rawcell>
+# <markdowncell>
 
-# Does our model obey the theory?
+# * Does our model obey the theory?
 
 # <codecell>
 
@@ -98,13 +107,13 @@ data = np.c_[range(1,41), r[1:], q, p]
 table = pandas.DataFrame(data, columns=['lag', "AC", "Q", "Prob(>Q)"])
 print table.set_index('lag')
 
-# <rawcell>
+# <markdowncell>
 
-# This indicates a lack of fit.
+# * This indicates a lack of fit.
 
-# <rawcell>
+# <markdowncell>
 
-# In-sample dynamic prediction. How good does our model do?
+# * In-sample dynamic prediction. How good does our model do?
 
 # <codecell>
 
@@ -121,11 +130,11 @@ ax.axis((-20.0, 38.0, -4.0, 200.0));
 # <codecell>
 
 def mean_forecast_err(y, yhat):
-    return (y-yhat).mean()
+    return y.sub(yhat).mean()
 
 # <codecell>
 
-mean_forecast_err(dta, predict_sunspots)
+mean_forecast_err(dta.SUNACTIVITY, predict_sunspots)
 
 # <headingcell level=3>
 
@@ -146,9 +155,9 @@ np.random.seed(1234)
 arparams = np.array([1, .75, -.65, -.55, .9])
 maparams = np.array([1, .65])
 
-# <rawcell>
+# <markdowncell>
 
-# Let's make sure this models is estimable.
+# * Let's make sure this models is estimable.
 
 # <codecell>
 
@@ -164,7 +173,7 @@ arma_t.isstationary()
 
 # <rawcell>
 
-# What does this mean?
+# * What does this mean?
 
 # <codecell>
 
@@ -193,7 +202,8 @@ fig = sm.graphics.tsa.plot_pacf(arma_rvs, lags=40, ax=ax2)
 
 # <rawcell>
 
-# For mixed ARMA processes the Autocorrelation function is a mixture of exponentials and damped sine waves after (q-p) lags. The partial autocorrelation function is a mixture of exponentials and dampened sine waves after (p-q) lags.
+# * For mixed ARMA processes the Autocorrelation function is a mixture of exponentials and damped sine waves after (q-p) lags. 
+# * The partial autocorrelation function is a mixture of exponentials and dampened sine waves after (p-q) lags.
 
 # <codecell>
 

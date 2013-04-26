@@ -7,7 +7,7 @@
 
 # <rawcell>
 
-# Vector Autoregression (VAR), introduced by Nobel laureate Christopher Sims in 1980, is a powerful statistical tool in the macroeconomist's toolkit. 
+# Vector Autoregression (VAR), introduced by Nobel laureate Christopher Sims in 1980, is a powerful statistical tool in the macroeconomist's toolkit.
 
 # <markdowncell>
 

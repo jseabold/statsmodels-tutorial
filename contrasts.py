@@ -5,6 +5,10 @@
 
 # Contrasts Overview
 
+# <codecell>
+
+import statsmodels.api as sm
+
 # <markdowncell>
 
 # This document is based heavily on this excellent resource from UCLA http://www.ats.ucla.edu/stat/r/library/contrast_coding.htm
@@ -24,8 +28,12 @@
 # <codecell>
 
 import pandas
-url = 'http://www.ats.ucla.edu/stat/R/notes/hsb2_nolabel.csv'
+url = 'http://www.ats.ucla.edu/stat/data/hsb2.csv'
 hsb2 = pandas.read_table(url, delimiter=",")
+
+# <codecell>
+
+hsb2.head(10)
 
 # <rawcell>
 
@@ -56,7 +64,15 @@ print contrast.matrix
 
 # <codecell>
 
+hsb2.race.head(10)
+
+# <codecell>
+
 print contrast.matrix[hsb2.race-1, :][:20]
+
+# <codecell>
+
+sm.categorical(hsb2.race.values)
 
 # <rawcell>
 
@@ -65,7 +81,7 @@ print contrast.matrix[hsb2.race-1, :][:20]
 # <codecell>
 
 from statsmodels.formula.api import ols
-mod = ols("write ~ C(race, Treatment)", df=hsb2)
+mod = ols("write ~ C(race, Treatment)", data=hsb2)
 res = mod.fit()
 print res.summary()
 
@@ -106,12 +122,16 @@ class Simple(object):
 
 # <codecell>
 
+hsb2.groupby('race')['write'].mean().mean()
+
+# <codecell>
+
 contrast = Simple().code_without_intercept(levels)
 print contrast.matrix
 
 # <codecell>
 
-mod = ols("write ~ C(race, Simple)", df=hsb2)
+mod = ols("write ~ C(race, Simple)", data=hsb2)
 res = mod.fit()
 print res.summary()
 
@@ -131,7 +151,7 @@ print contrast.matrix
 
 # <codecell>
 
-mod = ols("write ~ C(race, Sum)", df=hsb2)
+mod = ols("write ~ C(race, Sum)", data=hsb2)
 res = mod.fit()
 print res.summary()
 
@@ -159,7 +179,7 @@ print contrast.matrix
 
 # <codecell>
 
-mod = ols("write ~ C(race, Diff)", df=hsb2)
+mod = ols("write ~ C(race, Diff)", data=hsb2)
 res = mod.fit()
 print res.summary()
 
@@ -187,10 +207,9 @@ from patsy.contrasts import Helmert
 contrast = Helmert().code_without_intercept(levels)
 print contrast.matrix
 
-
 # <codecell>
 
-mod = ols("write ~ C(race, Helmert)", df=hsb2)
+mod = ols("write ~ C(race, Helmert)", data=hsb2)
 res = mod.fit()
 print res.summary()
 
@@ -224,12 +243,7 @@ k = 3
 
 # <codecell>
 
-_, bins = np.histogram(hsb2.read, 3)
-try: # requires numpy master
-   readcat = np.digitize(hsb2.read, bins, True)
-except:
-   readcat = np.digitize(hsb2.read, bins)
-hsb2['readcat'] = readcat
+hsb2['readcat'] = pandas.cut(hsb2.read, bins=3)
 hsb2.groupby('readcat').mean()['write']
 
 # <codecell>
@@ -241,7 +255,7 @@ print contrast.matrix
 
 # <codecell>
 
-mod = ols("write ~ C(readcat, Poly)", df=hsb2)
+mod = ols("write ~ C(readcat, Poly)", data=hsb2)
 res = mod.fit()
 print res.summary()
 
